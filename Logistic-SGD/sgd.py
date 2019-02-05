@@ -21,22 +21,23 @@ def accuracy(data, predictions):
         correct += (data[i]['label'] == (predictions[i]>=0.5))
     return float(correct)/len(data)
 
-# TODO: Update model using learning rate and L2 regularization
 def update(model, point, rate, lam):
     prob = predict(model,point)
     for i in range(len(model)):
         model[i] += rate*(point['features'][i]*(point['label']-prob) - lam*model[i])
-        
+
+    return model
+
 def initialize_model(k):
     return [random.gauss(0, 1) for x in range(k)]
 
-# TODO: Train model using training data
 def train(data, epochs, rate, lam):
     model = initialize_model(len(data[0]['features']))
     for i in range(epochs):
         for j in range(len(data)):
-            update(model, data[random.randint(0,len(data)-1)], rate, lam)
-        
+            model = update(model, data[random.randint(0,len(data)-1)], rate, lam)
+
+    print(model)
     return model
         
 def extract_features(raw):
@@ -51,11 +52,20 @@ def extract_features(raw):
         features.append(float(r['education_num'])/20)
         features.append(r['marital'] == 'Married-civ-spouse')
         #TODO: Add more feature extraction rules here!
+        features.append(float(r['fnlwgt'])/1000000)
+        features.append(r['sex'] == 'Male')
+        features.append(float(r['hr_per_week'])/100)
+        features.append(float(r['capital_gain'])/30000)
+        features.append(r['race'] == 'White')
+        features.append(r['type_employer'] == 'Private')
+        features.append(float(r['capital_loss'])/10000)
+        features.append(r['country'] == 'United-States')
+        features.append(r['occupation'] == 'Exec-managerial')
         point['features'] = features
         data.append(point)
     return data
 
 # TODO: Tune your parameters for final submission
 def submission(data):
-    return train(data, 1, .01, 0)
+    return train(data, 100, .01, .001)
     
